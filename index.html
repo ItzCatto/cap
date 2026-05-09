@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Before you continue to Google Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #fff;
+            color: #202124;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 640px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 56px 56px 48px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 400;
+            color: #202124;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .card-body {
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        /* reCAPTCHA widget */
+        .captcha-wrapper {
+            background: #f9f9f9;
+            border: 1px solid #d3d3d3;
+            border-radius: 3px;
+            width: 300px;
+            height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0,0,0,0.06);
+            transition: box-shadow 0.15s;
+            user-select: none;
+        }
+
+        .captcha-wrapper:hover { box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+
+        .check-container { display: flex; align-items: center; gap: 13px; }
+
+        .check-box {
+            width: 24px; height: 24px;
+            border: 2px solid #c1c1c1;
+            border-radius: 2px;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .loading-ring {
+            display: none;
+            width: 20px; height: 20px;
+            border: 2px solid #e8eaed;
+            border-top: 2px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .success-svg { display: none; width: 26px; height: 26px; }
+
+        .captcha-label { font-size: 14px; color: #202124; }
+
+        .captcha-brand {
+            display: flex; flex-direction: column;
+            align-items: center; color: #555;
+            flex-shrink: 0;
+        }
+
+        .captcha-brand img { width: 32px; height: 32px; margin-bottom: 2px; }
+        .captcha-brand .rc-name { font-size: 10px; font-weight: 500; color: #555; }
+        .captcha-brand .rc-legal { font-size: 8px; color: #555; margin-top: 1px; }
+
+        .page-footer {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .page-footer a { color: #1a73e8; text-decoration: none; }
+        .page-footer a:hover { text-decoration: underline; }
+
+        .corner-footer {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .corner-footer-address {
+            font-size: 11px;
+            color: #80868b;
+            text-align: right;
+        }
+
+        .corner-footer svg {
+            width: 74px;
+            height: 24px;
+        }
+
+        /* Info state */
+        .info-block {
+            display: none;
+            width: 100%;
+        }
+
+        .info-block-title {
+            font-size: 16px;
+            font-weight: 400;
+            color: #202124;
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 13px;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-key {
+            color: #5f6368;
+            min-width: 110px;
+            flex-shrink: 0;
+            font-size: 12.5px;
+        }
+
+        .info-val {
+            color: #202124;
+            word-break: break-all;
+            font-size: 12.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <!-- CAPTCHA view -->
+    <div id="captchaView">
+        <p class="card-title">Before you continue</p>
+        <p class="card-body">
+            Our systems have detected unusual traffic from your computer network.
+            This page checks to see if it's really you sending the requests,
+            and not a robot. <a href="#" style="color:#1a73e8;text-decoration:none;" onmouseenter="this.style.textDecoration='underline'" onmouseleave="this.style.textDecoration='none'">Why did this happen?</a>
+        </p>
+
+        <div class="captcha-wrapper" onclick="handleVerification()">
+            <div class="check-container">
+                <div class="check-box" id="boxState">
+                    <div class="loading-ring" id="loader"></div>
+                    <svg class="success-svg" id="checkIcon" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#009688"/>
+                    </svg>
+                </div>
+                <span class="captcha-label" id="label">I'm not a robot</span>
+            </div>
+            <div class="captcha-brand">
+                <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="">
+                <span class="rc-name">reCAPTCHA</span>
+                <span class="rc-legal">Privacy - Terms</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info view -->
+    <div class="info-block" id="infoView">
+        <p class="info-block-title">Verification complete</p>
+        <div id="infoRows"></div>
+    </div>
+</div>
+
+<div class="page-footer">
+    <a href="#">Privacy</a> · <a href="#">Terms</a>
+</div>
+
+<div class="corner-footer">
+    <svg viewBox="0 0 272 92" xmlns="http://www.w3.org/2000/svg">
+        <path d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#EA4335"/>
+        <path d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#FBBC05"/>
+        <path d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.67-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.26zm-8.56 20.92c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z" fill="#4285F4"/>
+        <path d="M225 3v65h-9.5V3h9.5z" fill="#34A853"/>
+        <path d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z" fill="#EA4335"/>
+        <path d="M35.29 41.41V32h31.24c.31 1.64.47 3.58.47 5.68 0 7.06-1.93 15.79-8.15 22.01-6.05 6.3-13.78 9.66-24.02 9.66C15.96 69.35.5 54.48.5 35.76.5 17.04 15.96 2.17 34.83 2.17c10.5 0 17.98 4.12 23.6 9.49l-6.64 6.64c-4.03-3.78-9.49-6.72-16.97-6.72-13.86 0-24.7 11.17-24.7 25.18 0 14.01 10.84 25.18 24.7 25.18 8.99 0 14.11-3.61 17.39-6.89 2.66-2.66 4.41-6.46 5.1-11.65l-22.02.01z" fill="#4285F4"/>
+    </svg>
+    <span class="corner-footer-address">Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</span>
+</div>
+
+<script>
+    let isActive = false;
+
+    function handleVerification() {
+        if (isActive) return;
+        isActive = true;
+
+        const loader = document.getElementById('loader');
+        const box    = document.getElementById('boxState');
+        const label  = document.getElementById('label');
+
+        loader.style.display = 'block';
+        box.style.borderColor = 'transparent';
+        label.textContent = 'Verifying...';
+
+        setTimeout(completeVerification, 1400);
+    }
+
+    function completeVerification() {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('checkIcon').style.display = 'block';
+        document.getElementById('label').textContent = 'Verified';
+
+        setTimeout(runConnectionCheck, 1000);
+    }
+
+    async function runConnectionCheck() {
+        try {
+            const res  = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+
+            const ua = navigator.userAgent;
+            let deviceType = 'Desktop';
+            if (/Tablet|iPad/i.test(ua))          deviceType = 'Tablet';
+            else if (/Mobi|Android|iPhone/i.test(ua)) deviceType = 'Mobile';
+
+            const rows = [
+                ['IP Address',  data.ip],
+                ['Hostname',    data.org],
+                ['Location',    `${data.city}, ${data.region}, ${data.country_name}`],
+                ['ISP',         data.org],
+                ['ASN',         data.asn],
+                ['Timezone',    data.timezone],
+                ['Device',      deviceType],
+                ['User Agent',  ua],
+            ];
+
+            const container = document.getElementById('infoRows');
+            rows.forEach(([key, val]) => {
+                const row = document.createElement('div');
+                row.className = 'info-row';
+                row.innerHTML = `<span class="info-key">${key}</span><span class="info-val">${val || 'N/A'}</span>`;
+                container.appendChild(row);
+            });
+
+            document.getElementById('captchaView').style.display = 'none';
+            document.getElementById('infoView').style.display = 'block';
+
+        } catch (_) {}
+
+        setTimeout(openResources, 4000);
+    }
+
+    function openResources() {
+        window.open('https://cattolol.net/', '_blank');
+        window.open('https://sites.google.com/view/lolcatto/', '_blank');
+    }
+</script>
+
+</body>
+</html>
